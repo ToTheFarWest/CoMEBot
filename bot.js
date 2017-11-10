@@ -15,13 +15,30 @@ fs.readdir("./events/", (err, files) => {
     });
 });
 
+//Commands
+client.commands = new Discord.Collection();
+client.aliases = new Discord.Collection();
 
-/*client.on("ready", () => {
-    console.log("I am ready!");
+fs.readdir(`./commands/`, (err,files) => {
+  if(err) console.error(err);
+  console.log(`Loading a total of %{files.length} commands.`);
+  files.forEach(f=> {
+    //require the file into memory
+    let props = require(`./commands/${f}`);
+    console.log(`Loading Command: ${props.help.name}. :ok_hand:`);
+    //add the command to the Commands Collection
+    client.commands.set(props.help.name, props);
+    //loops through each Alias in that commands
+    props.conf.aliases.forEach(alias => {
+      //add the alias to the Aliases Collection
+      client.aliases.set(alias, props.help.name);
+    });
+  });
 });
-*/
+
 client.on("message", (message) => {
-    if (message.author.bot) return;
+    //Ignores messages by clients or without the prefix
+    if (message.author.client) return;
     if(message.content.indexOf(config.prefix) !== 0) return;
 
     //Defining args (sp00ki)
@@ -47,10 +64,30 @@ client.on("message", (message) => {
             message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
         }
     }
+    else{
+      //elevation
+      let perms = client.elevation(message);
+      let cmd;
+      //check if the command exists in Commands
+      if (client.commands.has(command)) {
+        cmd = client.commands.get(command);
+      }
+      //Check if the command exists in Aliases
+      else if (client.aliases.has(command)){
+        cmd = client.commands.get(client.aliases.get(command));
+      }
+
+      if(cmd) {
+        //Check user's perm level against the required level in the command.
+        if(perms < cmd.conf.permLevel) return;
+        //Run the 'exports.run()' function defined in each command.
+        cmd.run(client, message, args)
+      }
+  }
 
 
     //Running commands
-    else{
+/*    else{
         try {
             let commandFile = require(`./commands/${command}.js`);
             commandFile.run(client, message, args, config);
@@ -58,6 +95,6 @@ client.on("message", (message) => {
         catch (err) {
             console.error(err);
         }
-    }
+    }*/
 });
 client.login(config.token)
