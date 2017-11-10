@@ -36,9 +36,21 @@ fs.readdir(`./commands/`, (err,files) => {
   });
 });
 
+//elevation
+client.elevation = function(message) {
+  let permlvl = 0;
+  let mod_role = message.guild.roles.find("name", "Moderator");
+  if(mod_role && message.member.roles.has(mod_role.id)) permlvl = 1;
+  let admin_role = message.guild.roles.find("name", "Admin");
+  if(admin_role && message.member.roles.has(admin_role.id)) permlvl = 2;
+  let owner_role = message.guild.roles.find("name", "Owner");
+  if(owner_role && message.member.roles.has(owner_role.id)) permlvl = 3;
+  if(message.author.id === config.ownerID) permlvl = 4;
+};
+
 client.on("message", (message) => {
     //Ignores messages by clients or without the prefix
-    if (message.author.client) return;
+    if (message.author.bot) return;
     if(message.content.indexOf(config.prefix) !== 0) return;
 
     //Defining args (sp00ki)
@@ -65,11 +77,13 @@ client.on("message", (message) => {
         }
     }
     else{
+      console.log("Reached the else statement!");
       //elevation
       let perms = client.elevation(message);
       let cmd;
       //check if the command exists in Commands
       if (client.commands.has(command)) {
+
         cmd = client.commands.get(command);
       }
       //Check if the command exists in Aliases
@@ -79,7 +93,11 @@ client.on("message", (message) => {
 
       if(cmd) {
         //Check user's perm level against the required level in the command.
-        if(perms < cmd.conf.permLevel) return;
+        //console.log("Checking perms...");
+        if(perms < cmd.conf.permLevel) {
+          //console.log("No perms");
+          return;
+        }
         //Run the 'exports.run()' function defined in each command.
         cmd.run(client, message, args)
       }
