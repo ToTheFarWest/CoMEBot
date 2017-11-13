@@ -1,5 +1,5 @@
 exports.run = (client, message, args) => {
-    message.channel.send("[Patreon](https://www.patreon.com/ChampionsME)").catch(console.error);
+    message.channel.send("https://www.patreon.com/ChampionsME").catch(console.error);
 };
 
 exports.conf = {

@@ -1,5 +1,5 @@
 exports.run = (client, message, args) => {
-    message.channel.send("[PayPal](https://www.paypal.me/YardenAkin)").catch(console.error);
+    message.channel.send("https://www.paypal.me/YardenAkin").catch(console.error);
 };
 
 exports.conf = {
