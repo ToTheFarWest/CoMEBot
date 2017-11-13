@@ -77,7 +77,6 @@ client.on("message", (message) => {
         }
     }
     else{
-      console.log("Reached the else statement!");
       //elevation
       let perms = client.elevation(message);
       let cmd;
